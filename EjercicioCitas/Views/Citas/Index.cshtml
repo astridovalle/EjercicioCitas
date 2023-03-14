@@ -1,0 +1,258 @@
+﻿@model IEnumerable<Entidad.DTO.CitasDTO>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Listado de Citas</h2>
+
+<p>
+    @Html.ActionLink("Agregar", "Create", "Citas", null, new { @class = "btn btn-success btn-large" })
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Fecha)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Hora)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Aprobada)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Auto)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Cliente)
+        </th>
+        <th>
+            Motivo de Rechazo
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Observaciones)
+        </th>
+        <th>
+            Fecha de Entrega
+        </th>
+
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @item.Fecha.ToString("dd-MMM-yyyy")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Hora)
+            </td>
+            <td>
+                @if (item.Aprobada == "Aprobada")
+                {
+                    <p style="color:forestgreen">@item.Aprobada</p>
+                }
+                else
+                {
+                    <p style="color:red">@item.Aprobada</p>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Auto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Cliente)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MotivoRechazo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Observaciones)
+            </td>
+            @if (item.Aprobada == "Aprobada")
+            {
+                <td>
+                    @Html.DisplayFor(modelItem => item.FechaEntrega)
+                </td>
+            }
+            else
+            {
+                <td>
+                </td>
+            }
+
+            <td>
+                @Html.ActionLink("Editar", "Edit", new { id = item.Id }) |
+                @if (item.Aprobada == "Rechazada" && ViewBag.Rol == "Administrador")
+                {
+                    <a onclick="ModalAprobarCita(@item.Id)">Aprobar</a> 
+                }
+
+                <a onclick="ModalDeleteCita(@item.Id)">Eliminar</a>
+            </td>
+        </tr>
+    }
+
+</table>
+
+<div class="modal fade" id="ModalDelete" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="ModalDeleteLabel">Eliminar Cita</h4>
+            </div>
+            <div class="modal-body">
+                ¿Estas seguro que deseas eliminar este registro?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" onclick="EliminarCita()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAprobar" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="ModalDeleteLabel">Aprobar Cita</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal">
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="AprobarValue"> Aprobar
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="DivMotivo">
+                        <label class="col-sm-2 control-label">Motivo de Rechazo</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="MotivoRechazo"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="DivObservaciones" style="display:none">
+                        <label class="col-sm-2 control-label">Observaciones</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="Observaciones"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="DivFechaEntrega" style="display:none">
+                        <label class="col-sm-2 control-label">Fecha de Entrega</label>
+                        <div class="col-sm-10">
+                            <input type="date" class="form-control" id="FechaEntrega" />
+                        </div>
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" onclick="AprobarCita()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var IdCita = 0;
+
+    function ModalDeleteCita(id) {
+        $('#ModalDelete').modal('show')
+        IdCita = id;
+    }
+
+    function EliminarCita() {
+        $.ajax({
+            url: 'Citas/Delete/' + IdCita,
+            type: 'POST',
+            succes: function (response) {
+                $('#ModalDelete').modal('hide')
+                IdCita = 0;
+            },
+            error: function (response) {
+                $('#ModalDelete').modal('hide')
+                IdCita = 0;
+            }
+        }).done(function () {
+            $('#ModalDelete').modal('hide')
+            IdCita = 0;
+            location.reload();
+        });
+    }
+
+    function ModalAprobarCita(id) {
+        $('#ModalAprobar').modal('show')
+        IdCita = id;
+    }
+
+    $(function () {
+        $('#AprobarValue').click(function () {
+            if ($(this).is(":checked")) {
+                $("#DivObservaciones").show();
+                $("#DivFechaEntrega").show();
+                $("#DivMotivo").hide();
+            } else {
+                $("#DivMotivo").show();
+                $("#DivObservaciones").hide();
+                $("#DivFechaEntrega").hide();
+            }
+        });
+
+
+    });
+
+    function AprobarCita() {
+        var fecha = new Date($("#FechaEntrega").val());
+        var Aprobado = false;
+
+        if ($('#AprobarValue').is(":checked")) {
+            Aprobado = true;
+        } else {
+            Aprobado = false;
+        }
+
+        var obj = {
+            Id: IdCita,
+            Aprobada: Aprobado,
+            MotivoRechazo: $("#MotivoRechazo").val(),
+            Observaciones: $("#Observaciones").val(),
+            FechaEntrega: fecha
+        };
+
+        $.ajax({
+            url: '/api/CitasApi',
+            type: 'post',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            success: function () {
+                Swal.fire({
+                    title: 'Ok!',
+                    text: 'Cita confirmada',
+                    icon: 'success',
+                    confirmButtonText: 'Ok'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
+                })
+            }
+        })
+    }
+
+</script>
+

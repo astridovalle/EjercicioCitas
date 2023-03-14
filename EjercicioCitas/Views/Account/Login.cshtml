@@ -1,0 +1,54 @@
+﻿@model Entidad.DTO.UsuarioDTO
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<h2>Login</h2>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true)
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Correo, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Correo, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Correo)
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Contrasena, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Contrasena, new { @class = "form-control" , @type = "password" })
+            @Html.ValidationMessageFor(model => model.Contrasena)
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Administrador, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.CheckBoxFor(model => model.Administrador)
+            @Html.ValidationMessageFor(model => model.Administrador)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Login" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}
+
+<div>
+    @Html.ActionLink("Registrarse", "Create", "Clientes")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
