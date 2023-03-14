@@ -12,6 +12,7 @@ namespace EjercicioCitas.Controllers
         public ActionResult Index()
         {
             object obj = Session["UserId"];
+            ViewBag.Rol = Session["Rol"];
             if (obj != null)
             {
                 ViewBag.CitasAceptadas = CitasBLL.GetCitasByStatus(true);
